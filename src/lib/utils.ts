@@ -10,21 +10,21 @@ export const generateMockData = () => {
   const songs = Array.from({ length: 1000 }, (_, index) => ({
     song_id: index + 1,
     artist_id: faker.number.int({ min: 1, max: 500 }),
-    date_streamed: faker.date.between({ from: "2024-02-01", to: "2024-08-31" }).toISOString().split("T")[0],
+    date_streamed: faker.date.between({ from: "2023-07-01", to: "2024-08-31" }).toISOString().split("T")[0],
     song_name: faker.music.songName(),
   }));
 
   const users = Array.from({ length: 5000 }, (_, index) => ({
     user_id: index + 1,
     user_name: faker.person.fullName(),
-    date_joined: faker.date.between({ from: "2024-02-01", to: "2024-08-27" }).toISOString().split("T")[0],
-    last_song_streamed: faker.date.between({ from: "2024-05-12", to: "2024-08-31" }).toISOString().split("T")[0],
+    date_joined: faker.date.between({ from: "2023-07-01", to: "2024-08-27" }).toISOString().split("T")[0],
+    last_song_streamed: faker.date.between({ from: "2023-10-12", to: "2024-08-31" }).toISOString().split("T")[0],
   }));
 
   const artists = Array.from({ length: 500 }, (_, index) => ({
     artist_id: index + 1,
     artist_name: faker.person.fullName(),
-    joined_date: faker.date.between({ from: "2024-02-01", to: "2024-08-31" }).toISOString().split("T")[0],
+    joined_date: faker.date.between({ from: "2023-07-01", to: "2024-08-31" }).toISOString().split("T")[0],
     avatar: `https://i.pravatar.cc/150?img=${faker.number.int({ min: 1, max: 70 })}`,
   }));
 
@@ -42,13 +42,13 @@ export const generateMockData = () => {
       artist_name,
       user_id: faker.number.int({ min: 1, max: 5000 }),
       user_name,
-      stream_date: faker.date.between({ from: "2024-02-01", to: "2024-08-31" }).toISOString().split("T")[0],
-      revenue_source: Math.random() < 0.5 ? "ads" : "subscription",
+      stream_date: faker.date.between({ from: "2023-07-01", to: "2024-08-31" }).toISOString().split("T")[0],
+      revenue_source: Math.random() < 0.5 ? "ads" : "subscriptions",
     };
   });
 
   const revenue = Array.from({ length: 2000 }, () => ({
-    revenue_date: faker.date.between({ from: "2024-02-01", to: "2024-08-31" }).toISOString().split("T")[0],
+    revenue_date: faker.date.between({ from: "2023-07-01", to: "2024-08-31" }).toISOString().split("T")[0],
     subscription_revenue: faker.number.float({ min: 10, max: 100, multipleOf: 0.01 }),
     ad_revenue: faker.number.float({ min: 1, max: 20, multipleOf: 0.01 }),
   }));

@@ -1,29 +1,53 @@
 import { useDataContext } from "@/context/DataContext";
 import { Card } from "../ui/customCard";
 import { useMemo } from "react";
+import { AudioLines, DollarSign, TrendingUp, UserRoundCheck, Users } from "lucide-react";
+import { getMonthNamesBetweenDates, monthNames } from "@/lib/utils";
+import { ProfileCard } from "../ui/ProfileCard";
 
 export const Stats = () => {
-  const { data, fromDate, toDate } = useDataContext();
+  const { data, fromDate, toDate, songFrequency } = useDataContext();
 
   const {
     totalUsers,
-    usersThisMonth,
+    usersGrowth,
     activeUsers,
+    activeUsersLastMonth,
     totalStreams,
     streamsThisMonth,
     totalRevenue,
     revenueThisMonth,
+    topSong,
     topArtist,
     topArtistStreams,
   } = useMemo(() => {
-    const usersThisMonth = data.users.filter((user) => {
+    const usersGrowth = data.users.filter((user) => {
       const dateJoined = new Date(user.date_joined);
       return dateJoined >= fromDate && dateJoined <= toDate;
     });
 
+    const totalUsers = data.users.filter((user) => {
+      const dateJoined = new Date(user.date_joined);
+      return dateJoined <= toDate;
+    });
+
     const activeUsers = data.users.filter((user) => {
       const lastStreamedDate = new Date(user.last_song_streamed);
-      return lastStreamedDate >= fromDate && lastStreamedDate <= toDate;
+      const currentDate = new Date();
+      const lastMonthDate = new Date(new Date().setMonth(new Date().getMonth() - 1));
+      return lastStreamedDate >= lastMonthDate && lastStreamedDate <= currentDate;
+    });
+
+    const activeUsersLastMonth = data.users.filter((user) => {
+      const lastStreamedDate = new Date(user.last_song_streamed);
+      const lastMonthDate = new Date(new Date().setMonth(new Date().getMonth() - 1));
+      const secondLastMonthDate = new Date(new Date().setMonth(new Date().getMonth() - 2));
+      return lastStreamedDate >= secondLastMonthDate && lastStreamedDate <= lastMonthDate;
+    });
+
+    const totalStreams = data.streams.filter((stream) => {
+      const streamDate = new Date(stream.stream_date);
+      return streamDate <= toDate;
     });
 
     const streamsThisMonth = data.streams.filter((stream) => {
@@ -31,7 +55,12 @@ export const Stats = () => {
       return streamDate >= fromDate && streamDate <= toDate;
     });
 
-    const totalRevenue = data.revenue.reduce((acc, curr) => acc + curr.subscription_revenue + curr.ad_revenue, 0);
+    const totalRevenue = data.revenue
+      .filter((revenue) => {
+        const revenueDate = new Date(revenue.revenue_date);
+        return revenueDate <= toDate;
+      })
+      .reduce((acc, curr) => acc + curr.subscription_revenue + curr.ad_revenue, 0);
 
     const revenueThisMonth = data.revenue
       .filter((revenue) => {
@@ -39,20 +68,6 @@ export const Stats = () => {
         return revenueDate >= fromDate && revenueDate <= toDate;
       })
       .reduce((acc, curr) => acc + curr.subscription_revenue + curr.ad_revenue, 0);
-
-    const songFrequency = data.streams
-      .filter((song) => {
-        const lastStreamedDate = new Date(song.stream_date);
-        return lastStreamedDate >= fromDate && lastStreamedDate <= toDate;
-      })
-      .reduce((acc, stream) => {
-        const { song_id } = stream;
-        if (!acc[song_id]) {
-          acc[song_id] = 0;
-        }
-        acc[song_id]++;
-        return acc;
-      }, {});
 
     // Step 3: Find the song_id with the maximum frequency
     let mostFrequentSongId = null;
@@ -65,33 +80,88 @@ export const Stats = () => {
       }
     }
 
-    const topArtistId = data.songs.find((song) => {
+    const topSong = data.songs.find((song) => {
       return song.song_id === Number(mostFrequentSongId);
-    }).artist_id;
+    });
+
+    const topArtistId = topSong?.artist_id;
 
     const topArtist = data.artists.find((artist) => {
-      return artist.artist_id === Number(topArtistId);
+      return artist?.artist_id === Number(topArtistId);
     });
     return {
-      totalUsers: data.users.length,
-      usersThisMonth: usersThisMonth.length,
+      totalUsers: totalUsers.length,
+      usersGrowth: usersGrowth.length,
       activeUsers: activeUsers.length,
-      totalStreams: data.streams.length,
+      activeUsersLastMonth: activeUsersLastMonth.length,
+      totalStreams: totalStreams.length,
       streamsThisMonth: streamsThisMonth.length,
       revenueThisMonth: revenueThisMonth.toFixed(2),
       totalRevenue: totalRevenue.toFixed(2),
+      topSong,
       topArtist,
       topArtistStreams: maxFrequency,
     };
-  }, [data, fromDate, toDate]);
+  }, [data.artists, data.revenue, data.songs, data.streams, data.users, fromDate, songFrequency, toDate]);
+
+  const monthBetweenDates = useMemo(() => {
+    return getMonthNamesBetweenDates(`${fromDate}`, `${toDate}`);
+  }, [fromDate, toDate]);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
-      <Card label="Total Users" count={totalUsers} growth={usersThisMonth} />
-      <Card label="Active Users" count={activeUsers} />
-      <Card label="Total Streams" count={totalStreams} growth={streamsThisMonth} />
-      <Card label="Revenue" count={totalRevenue} growth={revenueThisMonth} />
-      <Card label="Top Artist" name={topArtist.artist_name} count={`${topArtistStreams}`} />
+      <Card
+        label="Total Users"
+        count={totalUsers}
+        growth={usersGrowth}
+        Icon={Users}
+        fill="#341fe0"
+        BadgeIcon={TrendingUp}
+        footer1={`${usersGrowth} Users joined between ${monthBetweenDates[0]} and ${monthBetweenDates[monthBetweenDates.length - 1]}`}
+        footer2={`Total ${totalUsers} Users have joined until ${monthBetweenDates[monthBetweenDates.length - 1]}`}
+      />
+      <Card
+        label="Active Users"
+        count={activeUsers}
+        Icon={UserRoundCheck}
+        growth={activeUsers - activeUsersLastMonth}
+        fill="#3a64c5"
+        BadgeIcon={TrendingUp}
+        footer1={`${activeUsers} Active Users in the last 30 days`}
+        footer2={`${activeUsers - activeUsersLastMonth} more than the previous month`}
+      />
+      <Card
+        label="Total Streams"
+        count={totalStreams}
+        growth={streamsThisMonth}
+        Icon={AudioLines}
+        fill="#bb0ff0"
+        BadgeIcon={TrendingUp}
+        footer1={`${streamsThisMonth} streams happened between ${monthBetweenDates[0]} and ${
+          monthBetweenDates[monthBetweenDates.length - 1]
+        }`}
+        footer2={`Total ${totalStreams} streams until ${monthBetweenDates[monthBetweenDates.length - 1]}`}
+      />
+      <Card
+        label="Revenue"
+        count={totalRevenue}
+        growth={revenueThisMonth}
+        Icon={DollarSign}
+        fill="#1be446"
+        BadgeIcon={TrendingUp}
+        footer1={`$${revenueThisMonth} in revenue was earned between ${monthBetweenDates[0]} and ${
+          monthBetweenDates[monthBetweenDates.length - 1]
+        }`}
+        footer2={`Total $${totalRevenue} in revenue until ${monthBetweenDates[monthBetweenDates.length - 1]}`}
+      />
+      <ProfileCard
+        label="Top Artist"
+        name={topArtist?.artist_name}
+        count={topArtistStreams}
+        topSong={topSong?.song_name}
+        profilePic={topArtist?.avatar}
+        footer1={`Most Streamed Artist between ${monthBetweenDates[0]} and ${monthBetweenDates[monthBetweenDates.length - 1]}`}
+      />
     </div>
   );
 };

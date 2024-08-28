@@ -1,6 +1,6 @@
 import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis } from "recharts";
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 
 type Props = {
@@ -20,7 +20,7 @@ export function BarGraph({ header, description, chartData, chartConfig, xAxixKey
         <CardTitle>{header}</CardTitle>
         <CardDescription>{description}</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-10">
         <ChartContainer config={chartConfig}>
           <BarChart
             accessibilityLayer
@@ -40,7 +40,7 @@ export function BarGraph({ header, description, chartData, chartConfig, xAxixKey
               tickFormatter={(value) => value.slice(0, 3)}
               hide
             />
-            <XAxis dataKey={xAxixKey} type="number" hide />
+            <XAxis dataKey={xAxixKey} tickSize={2} width={240} tickMargin={1} type="number" />
             <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="line" />} />
             <Bar dataKey={xAxixKey} layout="vertical" fill="var(--color-songName)" radius={4}>
               <LabelList dataKey={yAxisKey} position="insideLeft" offset={8} className="fill-[--color-label]" fontSize={12} />

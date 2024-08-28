@@ -27,15 +27,25 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 type Props<T> = {
   inputPlaceholder: string;
   inputFiler: string;
+  inputFiler2: string;
   columns: ColumnDef<T>[];
   data: T[];
+  totalDesc: string;
 };
 
-export function CustomTable<T>({ inputPlaceholder, inputFiler, columns, data }: Props<T>) {
+export function CustomTable<T>({ inputPlaceholder, inputFiler, inputFiler2, columns, data, totalDesc }: Props<T>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
+
+  const customFilter = (row, _, filterValue) => {
+    // Return true if the value is found in either of the columns
+    return [inputFiler, inputFiler2].some((columnId) => {
+      const cellValue = row.getValue(columnId);
+      return cellValue && cellValue.toString().toLowerCase().includes(filterValue.toLowerCase());
+    });
+  };
 
   const table = useReactTable({
     data,
@@ -59,17 +69,30 @@ export function CustomTable<T>({ inputPlaceholder, inputFiler, columns, data }: 
         pageSize: 5,
       },
     },
+    filterFns: {
+      customFilter,
+    },
+    globalFilterFn: "customFilter",
   });
+
+  console.log({ columnFilters });
 
   return (
     <div className="w-full">
-      <div className="flex items-center py-4">
+      <div className="md:flex justify-between items-center py-4">
         <Input
           placeholder={inputPlaceholder}
-          value={(table.getColumn(inputFiler)?.getFilterValue() as string) ?? ""}
-          onChange={(event) => table.getColumn(inputFiler)?.setFilterValue(event.target.value)}
+          // value={(table.getColumn(inputFiler)?.getFilterValue() as string) ?? ""}
+          onChange={(event) => {
+            table.setGlobalFilter(event.target.value);
+            // table.getColumn(inputFiler)?.setFilterValue(event.target.value);
+            // table.getColumn(inputFiler2)?.setFilterValue(event.target.value);
+          }}
           className="max-w-sm"
         />
+        <div className="mt-4 md:mt-2 text-sm text-muted-foreground">
+          Total {table.getFilteredRowModel().rows.length} Streams {totalDesc}
+        </div>
       </div>
       <div className="rounded-md border">
         <Table>

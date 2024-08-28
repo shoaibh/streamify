@@ -1,7 +1,6 @@
 import { useDataContext } from "@/context/DataContext";
 import { BarGraph } from "../graph/BarGraph";
 import { ChartConfig } from "../ui/chart";
-import { useSongData } from "@/hooks/useSongData";
 import { useMemo } from "react";
 import { monthNames } from "@/lib/utils";
 
@@ -16,9 +15,7 @@ const chartBarConfig = {
 } satisfies ChartConfig;
 
 export const SongGraph = () => {
-  const { data, fromDate, toDate } = useDataContext();
-
-  const { songFrequency } = useSongData();
+  const { data, fromDate, toDate, songFrequency } = useDataContext();
 
   const chartData = useMemo(() => {
     const songEntries = Object.entries(songFrequency);

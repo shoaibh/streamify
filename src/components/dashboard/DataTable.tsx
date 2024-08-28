@@ -4,8 +4,8 @@ import { Button } from "../ui/button";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import { useDataContext } from "@/context/DataContext";
-import { useSongData } from "@/hooks/useSongData";
 import { useMemo } from "react";
+import { getMonthNamesBetweenDates } from "@/lib/utils";
 
 type Stream = {
   song_name: string;
@@ -69,42 +69,59 @@ const columns: ColumnDef<Stream>[] = [
     header: "User",
     cell: ({ row }) => <div className="capitalize">{row.getValue("user_id")}</div>,
   },
+  {
+    accessorKey: "revenue",
+    header: "Revenue Generated Through",
+    cell: ({ row }) => <div className="capitalize">{row.getValue("revenue")}</div>,
+  },
 ];
 
 export const DataTable = () => {
-  const { data, fromDate, toDate } = useDataContext();
-  // const { songFrequency } = useSongData();
+  const { data, fromDate, toDate, songFrequency, revenueSource } = useDataContext();
 
   const chartData = useMemo(() => {
-    const songFrequency = data.streams
-      .filter((song) => {
-        const lastStreamedDate = new Date(song.stream_date);
-        return lastStreamedDate >= fromDate && lastStreamedDate <= toDate;
-      })
-      .reduce((acc, stream) => {
-        const { song_id } = stream;
-        if (!acc[song_id]) {
-          acc[song_id] = 0;
+    return data.streams
+      .filter((stream) => {
+        const streamDate = new Date(stream.stream_date);
+        const dateCheck = streamDate >= fromDate && streamDate <= toDate;
+        if (revenueSource) {
+          return dateCheck && stream.revenue_source === revenueSource;
         }
-        acc[song_id]++;
-        return acc;
-      }, {});
-    return data.streams.map((stream) => {
-      return {
-        song_name: stream.song_name,
-        artist: stream.artist_name,
-        stream_count: songFrequency[stream.song_id],
-        user_id: stream.user_name,
-        date_streamed: stream.stream_date,
-      };
-    });
-  }, [data]);
+        return dateCheck;
+      })
+      .sort((a, b) => {
+        const bStreamDate = new Date(b.stream_date);
+        const aStreamDate = new Date(a.stream_date);
+        return bStreamDate - aStreamDate;
+      })
+      .map((stream) => {
+        return {
+          song_name: stream.song_name,
+          artist: stream.artist_name,
+          stream_count: songFrequency[stream.song_id],
+          user_id: stream.user_name,
+          date_streamed: stream.stream_date,
+          revenue: stream.revenue_source,
+        };
+      });
+  }, [data.streams, fromDate, revenueSource, songFrequency, toDate]);
 
-  console.log({ chartData, fromDate, toDate });
+  const totalDesc = useMemo(() => {
+    const months = getMonthNamesBetweenDates(fromDate, toDate);
+
+    return `${revenueSource ? ` (${revenueSource}) ` : ""}between ${months[0]} and ${months[months.length - 1]}`;
+  }, [fromDate, revenueSource, toDate]);
 
   return (
     <>
-      <CustomTable<Stream> columns={columns} inputPlaceholder="search with song name or artist" inputFiler="song_name" data={chartData} />
+      <CustomTable<Stream>
+        columns={columns}
+        inputPlaceholder="search with song name or artist"
+        inputFiler="song_name"
+        inputFiler2="artist"
+        data={chartData}
+        totalDesc={totalDesc}
+      />
     </>
   );
 };

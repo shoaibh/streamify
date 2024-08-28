@@ -1,7 +1,7 @@
 import { Label, Pie, PieChart, Sector } from "recharts";
 import { PieSectorDataItem } from "recharts/types/polar/Pie";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartConfig, ChartContainer, ChartStyle, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { MouseEventHandler } from "react";
 
@@ -55,11 +55,11 @@ export function CustomPieChart({ header, description, chartData, chartConfig, da
                   if (viewBox && "cx" in viewBox && "cy" in viewBox) {
                     return (
                       <text x={viewBox.cx} y={viewBox.cy} textAnchor="middle" dominantBaseline="middle">
-                        <tspan x={viewBox.cx} y={viewBox.cy} className="fill-foreground text-3xl font-bold">
-                          {chartData[activeIndex]?.dataKey?.toLocaleString() || total}
-                        </tspan>
                         <tspan x={viewBox.cx} y={(viewBox.cy || 0) + 24} className="fill-muted-foreground">
-                          Visitors
+                          Total $
+                        </tspan>
+                        <tspan x={viewBox.cx} y={viewBox.cy} className="fill-foreground text-xl font-bold">
+                          {chartData[activeIndex]?.dataKey?.toLocaleString() || total}
                         </tspan>
                       </text>
                     );
@@ -70,6 +70,9 @@ export function CustomPieChart({ header, description, chartData, chartConfig, da
           </PieChart>
         </ChartContainer>
       </CardContent>
+      <CardFooter className="flex-col gap-2 text-sm">
+        <div className="flex items-center gap-2 font-medium leading-none">Select a Pie section to filter the data table</div>
+      </CardFooter>
     </Card>
   );
 }

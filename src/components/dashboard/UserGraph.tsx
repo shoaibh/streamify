@@ -1,7 +1,7 @@
 import { useDataContext } from "@/context/DataContext";
 import { LineGraph } from "../graph/LineGraph";
 import { ChartConfig } from "../ui/chart";
-import { createDateFromMonthAndDate, getMonthNamesBetweenDates } from "@/lib/utils";
+import { createDateFromMonthAndDate, getMonthNamesBetweenDates, monthNames } from "@/lib/utils";
 import { useMemo } from "react";
 
 const chartConfig = {
@@ -22,6 +22,10 @@ export const UserGraph = () => {
     const months = getMonthNamesBetweenDates(fromDate, toDate);
 
     const result = [];
+
+    if (months.length <= 1) {
+      months.unshift(monthNames[fromDate.getMonth() - 1]);
+    }
 
     months.forEach((month) => {
       const thatDate = createDateFromMonthAndDate(month, new Date(fromDate).getDate());

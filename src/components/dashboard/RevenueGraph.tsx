@@ -20,10 +20,10 @@ const pieChartConfig = {
 } satisfies ChartConfig;
 
 export const RevenueGraph = () => {
-  const [activeMonth, setActiveMonth] = useState("subscriptions");
+  const [activeMonth, setActiveMonth] = useState("");
   const activeIndex = useMemo(() => desktopData.findIndex((item) => item.source === activeMonth), [activeMonth]);
 
-  const { data, fromDate, toDate } = useDataContext();
+  const { data, fromDate, toDate, setRevenueSource } = useDataContext();
 
   const { chartData, totalRevenue } = useMemo(() => {
     const revenueBetweenDates = data.revenue.filter((r) => new Date(r.revenue_date) <= toDate && new Date(r.revenue_date) >= fromDate);
@@ -42,6 +42,16 @@ export const RevenueGraph = () => {
     };
   }, [data, fromDate, toDate]);
 
+  const onClickPieSection = (section: string) => {
+    if (section === activeMonth) {
+      setActiveMonth("");
+      setRevenueSource("");
+      return;
+    }
+    setActiveMonth(section);
+    setRevenueSource(section);
+  };
+
   return (
     <CustomPieChart
       header="Revenue"
@@ -51,7 +61,7 @@ export const RevenueGraph = () => {
       nameKey="source"
       chartConfig={pieChartConfig}
       activeIndex={activeIndex}
-      onClick={(e) => setActiveMonth(e.name)}
+      onClick={(e) => onClickPieSection(e.name)}
       total={totalRevenue}
     />
   );

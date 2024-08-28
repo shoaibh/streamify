@@ -36,8 +36,8 @@ export function LineGraph({ header, description, chartData, chartConfig, xAxixKe
             <CartesianGrid vertical={false} />
             <XAxis dataKey={xAxixKey} tickLine={false} axisLine={false} tickMargin={8} tickFormatter={(value) => value.slice(0, 3)} />
             <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
-            <Line dataKey={yAxisKey} type="linear" stroke="var(--color-totalUsers)" strokeWidth={2} dot={false} />
-            <Line dataKey={yAxisKey2} type="linear" stroke="var(--color-activeUsers)" strokeWidth={2} dot={false} />
+            <Line dataKey={yAxisKey} label={yAxisKey} type="linear" stroke="var(--color-totalUsers)" strokeWidth={2} dot={false} />
+            <Line dataKey={yAxisKey2} label={yAxisKey2} type="linear" stroke="var(--color-activeUsers)" strokeWidth={2} dot={false} />
           </LineChart>
         </ChartContainer>
       </CardContent>
