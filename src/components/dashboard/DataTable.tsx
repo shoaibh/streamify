@@ -1,18 +1,19 @@
-import { CustomTable } from "../table/Table";
-import { ColumnDef } from "@tanstack/react-table";
-import { Button } from "../ui/button";
-import { ArrowDown, ArrowUp } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import { useDataContext } from "@/context/DataContext";
-import { useMemo } from "react";
 import { getMonthNamesBetweenDates } from "@/lib/utils";
+import { ColumnDef } from "@tanstack/react-table";
+import { ArrowDown, ArrowUp } from "lucide-react";
+import { useMemo } from "react";
+import { CustomTable } from "../table/Table";
+import { Button } from "../ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 
 type Stream = {
   song_name: string;
   artist: string;
   date_streamed: string;
-  stream_count: string;
+  stream_count: number;
   user_id: string;
+  revenue: string;
 };
 
 const columns: ColumnDef<Stream>[] = [
@@ -77,10 +78,13 @@ const columns: ColumnDef<Stream>[] = [
 ];
 
 export const DataTable = () => {
-  const { data, fromDate, toDate, songFrequency, revenueSource } = useDataContext();
+  const { streamData, fromDate, toDate, songFrequency, revenueSource, loading } = useDataContext();
 
   const chartData = useMemo(() => {
-    return data.streams
+    if (loading) {
+      return [];
+    }
+    return streamData
       .filter((stream) => {
         const streamDate = new Date(stream.stream_date);
         const dateCheck = streamDate >= fromDate && streamDate <= toDate;
@@ -90,8 +94,8 @@ export const DataTable = () => {
         return dateCheck;
       })
       .sort((a, b) => {
-        const bStreamDate = new Date(b.stream_date);
-        const aStreamDate = new Date(a.stream_date);
+        const bStreamDate = new Date(b.stream_date).getTime();
+        const aStreamDate = new Date(a.stream_date).getTime();
         return bStreamDate - aStreamDate;
       })
       .map((stream) => {
@@ -104,7 +108,7 @@ export const DataTable = () => {
           revenue: stream.revenue_source,
         };
       });
-  }, [data.streams, fromDate, revenueSource, songFrequency, toDate]);
+  }, [fromDate, loading, revenueSource, songFrequency, streamData, toDate]);
 
   const totalDesc = useMemo(() => {
     const months = getMonthNamesBetweenDates(fromDate, toDate);
@@ -114,6 +118,7 @@ export const DataTable = () => {
 
   return (
     <>
+      <h1 className="text-2xl mb-2">Data Table</h1>
       <CustomTable<Stream>
         columns={columns}
         inputPlaceholder="search with song name or artist"

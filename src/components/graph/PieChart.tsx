@@ -14,7 +14,7 @@ type Props = {
   dataKey: string;
   nameKey: string;
   activeIndex: number;
-  total: string;
+  total: number;
   onClick: (e: MouseEventHandler) => void;
 };
 

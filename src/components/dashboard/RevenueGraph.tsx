@@ -26,7 +26,11 @@ export const RevenueGraph = () => {
   const { data, fromDate, toDate, setRevenueSource } = useDataContext();
 
   const { chartData, totalRevenue } = useMemo(() => {
-    const revenueBetweenDates = data.revenue.filter((r) => new Date(r.revenue_date) <= toDate && new Date(r.revenue_date) >= fromDate);
+    if (!data?.revenue) {
+      return { totalRevenue: 0 };
+    }
+
+    const revenueBetweenDates = data?.revenue.filter((r) => new Date(r.revenue_date) <= toDate && new Date(r.revenue_date) >= fromDate);
 
     const totalRevenue = revenueBetweenDates.reduce((acc, curr) => acc + curr.subscription_revenue + curr.ad_revenue, 0).toFixed(2);
     const subsRevenue = revenueBetweenDates.reduce((acc, curr) => acc + curr.subscription_revenue, 0);
@@ -38,9 +42,9 @@ export const RevenueGraph = () => {
     ];
     return {
       chartData,
-      totalRevenue,
+      totalRevenue: Number(totalRevenue),
     };
-  }, [data, fromDate, toDate]);
+  }, [data?.revenue, fromDate, toDate]);
 
   const onClickPieSection = (section: string) => {
     if (section === activeMonth) {

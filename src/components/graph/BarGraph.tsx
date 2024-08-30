@@ -20,7 +20,7 @@ export function BarGraph({ header, description, chartData, chartConfig, xAxixKey
         <CardTitle>{header}</CardTitle>
         <CardDescription>{description}</CardDescription>
       </CardHeader>
-      <CardContent className="px-10">
+      <CardContent>
         <ChartContainer config={chartConfig}>
           <BarChart
             accessibilityLayer
@@ -29,6 +29,8 @@ export function BarGraph({ header, description, chartData, chartConfig, xAxixKey
             margin={{
               right: 16,
             }}
+            maxBarSize={400}
+            height={500}
           >
             <CartesianGrid horizontal={false} />
             <YAxis
@@ -40,9 +42,9 @@ export function BarGraph({ header, description, chartData, chartConfig, xAxixKey
               tickFormatter={(value) => value.slice(0, 3)}
               hide
             />
-            <XAxis dataKey={xAxixKey} tickSize={2} width={240} tickMargin={1} type="number" />
+            <XAxis dataKey={xAxixKey} tickSize={5} width={240} tickMargin={5} type="number" />
             <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="line" />} />
-            <Bar dataKey={xAxixKey} layout="vertical" fill="var(--color-songName)" radius={4}>
+            <Bar dataKey={xAxixKey} layout="vertical" width={5000} barSize={400} height={400} fill="var(--color-songName)" radius={4}>
               <LabelList dataKey={yAxisKey} position="insideLeft" offset={8} className="fill-[--color-label]" fontSize={12} />
               <LabelList dataKey={xAxixKey} position="right" offset={8} className="fill-foreground" fontSize={12} />
             </Bar>

@@ -1,7 +1,7 @@
 import { useDataContext } from "@/context/DataContext";
 import { LineGraph } from "../graph/LineGraph";
 import { ChartConfig } from "../ui/chart";
-import { createDateFromMonthAndDate, getMonthNamesBetweenDates, monthNames } from "@/lib/utils";
+import { createDateFromMonthAndDate, getLastMonthDate, getMonthNamesBetweenDates, monthNames } from "@/lib/utils";
 import { useMemo } from "react";
 
 const chartConfig = {
@@ -19,9 +19,12 @@ export const UserGraph = () => {
   const { fromDate, toDate, data } = useDataContext();
 
   const chartData = useMemo(() => {
+    if (!data?.users) {
+      return [];
+    }
     const months = getMonthNamesBetweenDates(fromDate, toDate);
 
-    const result = [];
+    const result: Array<{ month: string; totalUsers: number; activeUsers: number }> = [];
 
     if (months.length <= 1) {
       months.unshift(monthNames[fromDate.getMonth() - 1]);
@@ -29,25 +32,27 @@ export const UserGraph = () => {
 
     months.forEach((month) => {
       const thatDate = createDateFromMonthAndDate(month, new Date(fromDate).getDate());
-      const totalUsersThatMonth = data.users.filter((user) => {
+      const lastMonthDate = getLastMonthDate(thatDate);
+
+      const totalUsersThatMonth = data?.users.filter((user) => {
         const dateJoined = new Date(user.date_joined);
         return dateJoined <= thatDate;
       }).length;
 
-      const activeUsersThatMonth = data.users.filter((user) => {
+      const activeUsersThatMonth = data?.users.filter((user) => {
         const dateJoined = new Date(user.last_song_streamed);
-        return dateJoined <= thatDate;
+        return dateJoined <= thatDate && dateJoined >= lastMonthDate;
       }).length;
       result.push({ month, totalUsers: totalUsersThatMonth, activeUsers: activeUsersThatMonth });
     });
 
     return result;
-  }, [data.users, fromDate, toDate]);
+  }, [data?.users, fromDate, toDate]);
 
   return (
     <LineGraph
       header="Users Growth"
-      description={`Users growth from ${chartData?.[0].month} to ${chartData?.[chartData?.length - 1].month}`}
+      description={`Users growth from ${chartData?.[0]?.month} to ${chartData?.[chartData?.length - 1]?.month}`}
       chartConfig={chartConfig}
       chartData={chartData}
       xAxixKey="month"

@@ -39,8 +39,8 @@ export function CustomTable<T>({ inputPlaceholder, inputFiler, inputFiler2, colu
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
 
-  const customFilter = (row, _, filterValue) => {
-    // Return true if the value is found in either of the columns
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const customFilter = (row: any, _: any, filterValue: any) => {
     return [inputFiler, inputFiler2].some((columnId) => {
       const cellValue = row.getValue(columnId);
       return cellValue && cellValue.toString().toLowerCase().includes(filterValue.toLowerCase());
@@ -72,10 +72,8 @@ export function CustomTable<T>({ inputPlaceholder, inputFiler, inputFiler2, colu
     filterFns: {
       customFilter,
     },
-    globalFilterFn: "customFilter",
+    // globalFilterFn: ()=>"customFilter",
   });
-
-  console.log({ columnFilters });
 
   return (
     <div className="w-full">

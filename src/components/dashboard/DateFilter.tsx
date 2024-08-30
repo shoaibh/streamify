@@ -9,14 +9,16 @@ export const DateFilter = () => {
     to: new Date(),
   });
 
-  const { setFromDate, setToDate } = useDataContext();
-
-  console.log({ date });
+  const { setFromDate, setToDate, loading, setLoading } = useDataContext();
 
   const onClick = () => {
+    if (!date || !date.from || !date.to) {
+      return;
+    }
     setFromDate(date.from);
     setToDate(date.to);
+    setLoading(false);
   };
 
-  return <DatePickerWithRange date={date} setDate={setDate} onClick={onClick} />;
+  return <DatePickerWithRange date={date} setDate={setDate} onClick={onClick} loading={loading} setLoading={setLoading} />;
 };

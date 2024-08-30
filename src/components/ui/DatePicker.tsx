@@ -10,17 +10,24 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { PopoverClose } from "@radix-ui/react-popover";
+import CustomLoader from "./CustomLoader";
 
 type Props = {
   className?: string;
   date: DateRange | undefined;
   setDate: React.Dispatch<DateRange | undefined>;
   onClick: () => void;
+  loading: boolean;
+  setLoading: (value: React.SetStateAction<boolean>) => void;
 };
 
-export function DatePickerWithRange({ className, date, setDate, onClick }: Props) {
+export function DatePickerWithRange({ className, date, setDate, onClick, loading, setLoading }: Props) {
+  const handleDateConfirm = () => {
+    setLoading(true);
+    onClick();
+  };
   return (
-    <div className={cn("grid gap-2", className)}>
+    <div className={cn("grid gap-2 mr-5", className)}>
       <Popover>
         <PopoverTrigger asChild>
           <Button
@@ -42,10 +49,10 @@ export function DatePickerWithRange({ className, date, setDate, onClick }: Props
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
+        <PopoverContent className="w-auto p-0 mr-8 flex md:block" align="start" onBlur={handleDateConfirm}>
           <Calendar initialFocus mode="range" defaultMonth={date?.from} selected={date} onSelect={setDate} numberOfMonths={2} />
-          <PopoverClose className="PopoverClose" aria-label="Close">
-            <Button onClick={onClick}>Confirm</Button>
+          <PopoverClose className="PopoverClose p-3 text-right w-full" aria-label="Close">
+            <Button onClick={handleDateConfirm}>{loading && <CustomLoader />} Confirm</Button>
           </PopoverClose>
         </PopoverContent>
       </Popover>
