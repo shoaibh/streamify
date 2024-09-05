@@ -1,15 +1,19 @@
 import { useDataContext } from "@/context/DataContext";
-import { getMonthNamesBetweenDates } from "@/lib/utils";
-import { ColumnDef } from "@tanstack/react-table";
+import { getMonthNamesBetweenDates, updateUrlParams } from "@/lib/utils";
+import { ColumnDef, PaginationState, SortingState } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp } from "lucide-react";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CustomTable } from "../table/Table";
 import { Button } from "../ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
+import { useDebounce } from "@/hooks/useDebounce";
 
 type Stream = {
   song_name: string;
+  song_img: string;
   artist: string;
+  artist_id: string;
+  artist_img: string;
   date_streamed: string;
   stream_count: number;
   user_id: string;
@@ -20,12 +24,31 @@ const columns: ColumnDef<Stream>[] = [
   {
     accessorKey: "song_name",
     header: "Song Name",
-    cell: ({ row }) => <div className="capitalize">{row.getValue("song_name")}</div>,
+    cell: ({ row }) => {
+      return (
+        <div className="flex gap-3 items-center text-sm text-start capitalize">
+          <img src={row.original.song_img} alt={row.getValue("song_name")} className="rounded-full aspect-square w-6" />
+          {row.getValue("song_name")}
+        </div>
+      );
+    },
+    maxSize: 100,
   },
   {
     accessorKey: "artist",
     header: "Artist",
-    cell: ({ row }) => <div className="capitalize">{row.getValue("artist")}</div>,
+    cell: ({ row }) => {
+      const onClick = () => {
+        const params = { artist_id: row.original.artist_id };
+        updateUrlParams(params);
+      };
+      return (
+        <div className="flex gap-3 items-center text-sm text-start capitalize" onClick={onClick}>
+          <img src={row.original.artist_img} alt={row.getValue("song_name")} className="rounded-full aspect-square w-6" />
+          <span className="text-blue-400 hover:text-blue-600 cursor-pointer">{row.getValue("artist")}</span>
+        </div>
+      );
+    },
   },
   {
     accessorKey: "date_streamed",
@@ -44,7 +67,11 @@ const columns: ColumnDef<Stream>[] = [
         </TooltipProvider>
       );
     },
-    cell: ({ row }) => <div className="lowercase">{row.getValue("date_streamed")}</div>,
+    cell: ({ row }) => {
+      const date_streamed = new Date(row.getValue("date_streamed")).toDateString().split(" ").slice(1).join(" ");
+
+      return <div>{date_streamed}</div>;
+    },
   },
   {
     accessorKey: "stream_count",
@@ -78,37 +105,50 @@ const columns: ColumnDef<Stream>[] = [
 ];
 
 export const DataTable = () => {
-  const { streamData, fromDate, toDate, songFrequency, revenueSource, loading } = useDataContext();
+  const { fromDate, toDate, revenueSource, artist, artistId } = useDataContext();
 
-  const chartData = useMemo(() => {
-    if (loading) {
-      return [];
-    }
-    return streamData
-      .filter((stream) => {
-        const streamDate = new Date(stream.stream_date);
-        const dateCheck = streamDate >= fromDate && streamDate <= toDate;
-        if (revenueSource) {
-          return dateCheck && stream.revenue_source === revenueSource;
-        }
-        return dateCheck;
+  const [chartData, setChartData] = useState([]);
+  const [totalDataCount, setTotalDataCount] = useState(0);
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 5,
+  });
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [searchStr, setSearchStr] = useState<string | undefined>("");
+
+  useEffect(() => {
+    if (artist) setSearchStr(artist.artist_name);
+    else setSearchStr("");
+  }, [artist]);
+
+  const debouncedValue = useDebounce<string | undefined>(searchStr, 300);
+
+  useEffect(() => {
+    // Make a request to the serverless function
+    fetch("/api/dataTable", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        toDate,
+        fromDate,
+        revenueSource,
+        page: pagination.pageIndex,
+        sortBy: sorting?.[0]?.id,
+        order: sorting?.[0]?.desc === undefined ? "desc" : sorting?.[0]?.desc || "asc",
+        searchStr: debouncedValue || artist?.artist_name,
+      }),
+    })
+      .then((response) => response.json())
+      .then((r) => {
+        setChartData(r.chartData);
+        setTotalDataCount(r.totalDataCount);
       })
-      .sort((a, b) => {
-        const bStreamDate = new Date(b.stream_date).getTime();
-        const aStreamDate = new Date(a.stream_date).getTime();
-        return bStreamDate - aStreamDate;
-      })
-      .map((stream) => {
-        return {
-          song_name: stream.song_name,
-          artist: stream.artist_name,
-          stream_count: songFrequency[stream.song_id],
-          user_id: stream.user_name,
-          date_streamed: stream.stream_date,
-          revenue: stream.revenue_source,
-        };
+      .catch((error) => {
+        console.error("Error:", error);
       });
-  }, [fromDate, loading, revenueSource, songFrequency, streamData, toDate]);
+  }, [toDate, fromDate, revenueSource, pagination.pageIndex, sorting, debouncedValue, artist?.artist_name]);
 
   const totalDesc = useMemo(() => {
     const months = getMonthNamesBetweenDates(fromDate, toDate);
@@ -118,7 +158,6 @@ export const DataTable = () => {
 
   return (
     <>
-      <h1 className="text-2xl mb-2">Data Table</h1>
       <CustomTable<Stream>
         columns={columns}
         inputPlaceholder="search with song name or artist"
@@ -126,6 +165,14 @@ export const DataTable = () => {
         inputFiler2="artist"
         data={chartData}
         totalDesc={totalDesc}
+        pagination={pagination}
+        setPagination={setPagination}
+        totalDataCount={totalDataCount}
+        sorting={sorting}
+        setSorting={setSorting}
+        searchStr={searchStr}
+        setSearchStr={setSearchStr}
+        artistId={artistId}
       />
     </>
   );

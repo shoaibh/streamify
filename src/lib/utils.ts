@@ -78,3 +78,11 @@ export function getLastMonthDate(date: Date) {
   lastMonthDate.setMonth(lastMonthDate.getMonth() - 1);
   return lastMonthDate;
 }
+
+export const updateUrlParams = (params: { [key: string]: string }) => {
+  const queryString = new URLSearchParams(params).toString();
+  const newUrl = `${window.location.pathname}${queryString && `?${queryString}`}`;
+
+  window.history.pushState({}, "", newUrl);
+  window.dispatchEvent(new PopStateEvent("popstate"));
+};

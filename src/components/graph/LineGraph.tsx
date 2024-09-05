@@ -18,7 +18,7 @@ type Props = {
 
 export function LineGraph({ header, description, chartData, chartConfig, xAxixKey, yAxisKey, yAxisKey2 }: Props) {
   return (
-    <Card>
+    <Card className="relative">
       <CardHeader>
         <CardTitle>{header}</CardTitle>
         <CardDescription>{description}</CardDescription>
@@ -41,6 +41,12 @@ export function LineGraph({ header, description, chartData, chartConfig, xAxixKe
           </LineChart>
         </ChartContainer>
       </CardContent>
+      <div className="absolute top-2 right-2">
+        <div>
+          <div className="w-3 h-3 aspect-square rounded-full bg-orange-500" /> Total Users
+        </div>
+        <div>Active users</div>
+      </div>
     </Card>
   );
 }

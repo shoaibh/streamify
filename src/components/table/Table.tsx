@@ -1,12 +1,12 @@
 import {
   ColumnDef,
   ColumnFiltersState,
+  PaginationState,
   SortingState,
   VisibilityState,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
-  getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
@@ -31,10 +31,32 @@ type Props<T> = {
   columns: ColumnDef<T>[];
   data: T[];
   totalDesc: string;
+  pagination: PaginationState;
+  setPagination: React.Dispatch<React.SetStateAction<PaginationState>>;
+  totalDataCount: number;
+  sorting: SortingState;
+  setSorting: React.Dispatch<React.SetStateAction<SortingState>>;
+  setSearchStr: React.Dispatch<React.SetStateAction<string | undefined>>;
+  searchStr: string | undefined;
+  artistId: string | null;
 };
 
-export function CustomTable<T>({ inputPlaceholder, inputFiler, inputFiler2, columns, data, totalDesc }: Props<T>) {
-  const [sorting, setSorting] = React.useState<SortingState>([]);
+export function CustomTable<T>({
+  inputPlaceholder,
+  inputFiler,
+  inputFiler2,
+  columns,
+  data,
+  totalDesc,
+  pagination,
+  setPagination,
+  totalDataCount,
+  sorting,
+  setSorting,
+  setSearchStr,
+  searchStr,
+  artistId,
+}: Props<T>) {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
@@ -53,21 +75,24 @@ export function CustomTable<T>({ inputPlaceholder, inputFiler, inputFiler2, colu
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+    onPaginationChange: setPagination,
+    columnResizeMode: "onChange",
+    columnResizeDirection: "ltr",
+    manualPagination: true,
+    rowCount: totalDataCount,
     state: {
       sorting,
       columnFilters,
       columnVisibility,
       rowSelection,
+      pagination,
     },
     initialState: {
-      pagination: {
-        pageSize: 5,
-      },
+      pagination,
     },
     filterFns: {
       customFilter,
@@ -76,20 +101,23 @@ export function CustomTable<T>({ inputPlaceholder, inputFiler, inputFiler2, colu
   });
 
   return (
-    <div className="w-full">
-      <div className="md:flex justify-between items-center py-4">
+    <div className={`w-full ${artistId ? "md:w-[calc(75vw-5rem)]" : ""} lg:w-full`}>
+      <div className="flex justify-between gap-4 items-center py-4">
         <Input
           placeholder={inputPlaceholder}
           // value={(table.getColumn(inputFiler)?.getFilterValue() as string) ?? ""}
           onChange={(event) => {
             table.setGlobalFilter(event.target.value);
+            setSearchStr(event.target.value);
             // table.getColumn(inputFiler)?.setFilterValue(event.target.value);
             // table.getColumn(inputFiler2)?.setFilterValue(event.target.value);
           }}
-          className="max-w-sm"
+          value={searchStr}
+          className="max-w-sm w-full p-3"
+          type="search"
         />
-        <div className="mt-4 md:mt-2 text-sm text-muted-foreground">
-          Total {table.getFilteredRowModel().rows.length} Streams {totalDesc}
+        <div className=" text-sm text-muted-foreground">
+          Total {totalDataCount} Streams {totalDesc}
         </div>
       </div>
       <div className="rounded-md border">
@@ -127,7 +155,7 @@ export function CustomTable<T>({ inputPlaceholder, inputFiler, inputFiler2, colu
         </Table>
       </div>
 
-      <Pagination className="mt-5">
+      <Pagination className="mt-5 pb-5">
         <PaginationContent>
           {table.getCanPreviousPage() && (
             <PaginationItem>
@@ -144,7 +172,12 @@ export function CustomTable<T>({ inputPlaceholder, inputFiler, inputFiler2, colu
             (_, index) => table.getState().pagination.pageIndex + index + (table.getState().pagination.pageIndex > 0 ? 0 : 1)
           ).map((page) => (
             <PaginationItem className="cursor-pointer" key={page}>
-              <PaginationLink isActive={page === table.getState().pagination.pageIndex + 1} onClick={() => table.setPageIndex(page - 1)}>
+              <PaginationLink
+                isActive={page === table.getState().pagination.pageIndex + 1}
+                onClick={() => {
+                  table.setPageIndex(page - 1);
+                }}
+              >
                 {page}
               </PaginationLink>
             </PaginationItem>

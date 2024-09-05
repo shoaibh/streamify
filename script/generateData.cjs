@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const { faker } = require("@faker-js/faker");
 
-const filePath = path.join(__dirname, "../src/data/data.json");
+const filePath = path.join(__dirname, "../api/data.json");
 
 const generateMockData = () => {
   const songs = Array.from({ length: 1000 }, (_, index) => ({
@@ -10,13 +10,7 @@ const generateMockData = () => {
     artist_id: faker.number.int({ min: 1, max: 500 }),
     date_streamed: faker.date.between({ from: "2023-07-01", to: "2024-08-31" }).toISOString().split("T")[0],
     song_name: faker.music.songName(),
-  }));
-
-  const users = Array.from({ length: 5000 }, (_, index) => ({
-    user_id: index + 1,
-    user_name: faker.person.fullName(),
-    date_joined: faker.date.between({ from: "2023-07-01", to: "2024-08-27" }).toISOString().split("T")[0],
-    last_song_streamed: faker.date.between({ from: "2023-10-12", to: "2024-08-31" }).toISOString().split("T")[0],
+    cover: faker.image.url({ width: 640, height: 640, category: "music" }),
   }));
 
   const artists = Array.from({ length: 500 }, (_, index) => ({
@@ -26,11 +20,38 @@ const generateMockData = () => {
     avatar: `https://i.pravatar.cc/150?img=${faker.number.int({ min: 1, max: 70 })}`,
   }));
 
-  const revenue = Array.from({ length: 2000 }, () => ({
-    revenue_date: faker.date.between({ from: "2023-07-01", to: "2024-08-31" }).toISOString().split("T")[0],
-    subscription_revenue: faker.number.float({ min: 10, max: 100, multipleOf: 0.01 }),
-    ad_revenue: faker.number.float({ min: 1, max: 20, multipleOf: 0.01 }),
-  }));
+  const users = Array.from({ length: 5000 }, (_, index) => {
+    const song_id = faker.number.int({ min: 1, max: 1000 });
+    const song_name = songs[song_id - 1].song_name;
+    const artist_id = songs[song_id - 1].artist_id;
+    const artist_name = artists[artist_id - 1].artist_name;
+    return {
+      user_id: index + 1,
+      user_name: faker.person.fullName(),
+      date_joined: faker.date.between({ from: "2023-07-01", to: "2024-08-27" }).toISOString().split("T")[0],
+      last_song_streamed: faker.date.between({ from: "2023-10-12", to: "2024-08-31" }).toISOString().split("T")[0],
+      last_song_streamed_id: song_id,
+      last_song_streamd_name: song_name,
+      last_song_artist_id: artist_id,
+      last_song_artist_name: artist_name,
+    };
+  });
+
+  const revenue = Array.from({ length: 2000 }, () => {
+    const song_id = faker.number.int({ min: 1, max: 1000 });
+    const song_name = songs[song_id - 1].song_name;
+    const artist_id = songs[song_id - 1].artist_id;
+    const artist_name = artists[artist_id - 1].artist_name;
+    return {
+      revenue_date: faker.date.between({ from: "2023-07-01", to: "2024-08-31" }).toISOString().split("T")[0],
+      subscription_revenue: faker.number.float({ min: 10, max: 100, multipleOf: 0.01 }),
+      ad_revenue: faker.number.float({ min: 1, max: 20, multipleOf: 0.01 }),
+      song_id,
+      song_name,
+      artist_id,
+      artist_name,
+    };
+  });
 
   const streams = Array.from({ length: 100000 }, (_, index) => {
     const song_id = faker.number.int({ min: 1, max: 1000 });
@@ -43,6 +64,7 @@ const generateMockData = () => {
       id: index,
       song_id,
       song_name,
+      artist_id,
       artist_name,
       user_id,
       user_name,
