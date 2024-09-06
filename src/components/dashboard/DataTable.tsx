@@ -169,8 +169,6 @@ export const DataTable = () => {
       <CustomTable<Stream>
         columns={columns}
         inputPlaceholder="search with song name or artist"
-        inputFiler="song_name"
-        inputFiler2="artist"
         data={chartData}
         totalDesc={totalDesc}
         pagination={pagination}

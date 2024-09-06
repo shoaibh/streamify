@@ -1,17 +1,4 @@
 import {
-  ColumnDef,
-  ColumnFiltersState,
-  PaginationState,
-  SortingState,
-  VisibilityState,
-  flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
-import * as React from "react";
-import {
   Pagination,
   PaginationContent,
   PaginationEllipsis,
@@ -20,6 +7,17 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import {
+  ColumnDef,
+  PaginationState,
+  SortingState,
+  VisibilityState,
+  flexRender,
+  getCoreRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import * as React from "react";
 
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -27,8 +25,6 @@ import Skeleton from "../ui/Skeleton";
 
 type Props<T> = {
   inputPlaceholder: string;
-  inputFiler: string;
-  inputFiler2: string;
   columns: ColumnDef<T>[];
   data: T[];
   totalDesc: string;
@@ -45,8 +41,6 @@ type Props<T> = {
 
 export function CustomTable<T>({
   inputPlaceholder,
-  inputFiler,
-  inputFiler2,
   columns,
   data,
   totalDesc,
@@ -60,26 +54,15 @@ export function CustomTable<T>({
   artistId,
   isLoading,
 }: Props<T>) {
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const customFilter = (row: any, _: any, filterValue: any) => {
-    return [inputFiler, inputFiler2].some((columnId) => {
-      const cellValue = row.getValue(columnId);
-      return cellValue && cellValue.toString().toLowerCase().includes(filterValue.toLowerCase());
-    });
-  };
 
   const table = useReactTable({
     data,
     columns,
     onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
     onPaginationChange: setPagination,
@@ -89,16 +72,12 @@ export function CustomTable<T>({
     rowCount: totalDataCount,
     state: {
       sorting,
-      columnFilters,
       columnVisibility,
       rowSelection,
       pagination,
     },
     initialState: {
       pagination,
-    },
-    filterFns: {
-      customFilter,
     },
     // globalFilterFn: ()=>"customFilter",
   });
@@ -175,6 +154,7 @@ export function CustomTable<T>({
         </Table>
       </div>
 
+      {isLoading && <Skeleton className="mt-5 pb-10 mx-auto w-[200px]" />}
       {!isLoading && data?.length > 0 && (
         <Pagination className="mt-5 pb-5">
           <PaginationContent>

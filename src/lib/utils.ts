@@ -26,7 +26,7 @@ export function getMonthNamesBetweenDates(startDate: string | Date, endDate: str
 
   const months = [];
 
-  while (start <= end) {
+  while (start <= end || (start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear())) {
     const month = monthNames[start.getMonth()];
     const year = start.getFullYear();
     months.push(`${month} ${year}`);
