@@ -2,9 +2,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Input } from "../ui/input";
 import { useDebounce } from "@/hooks/useDebounce";
 import CustomLoader from "../ui/CustomLoader";
+import Skeleton from "../ui/Skeleton";
+import { useDataContext } from "@/context/DataContext";
 
 export const SearchBox = ({ className }: { className: string }) => {
   const [loading, setLoading] = useState(false);
+  const { setLoading: setArtistDataLoading } = useDataContext();
   const [searchStr, setSearchStr] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -15,7 +18,6 @@ export const SearchBox = ({ className }: { className: string }) => {
   const debouncedValue = useDebounce<string | undefined>(searchStr, 300);
 
   useEffect(() => {
-    if (!showSuggestions) return;
     setLoading(true);
     fetch("/api/search", {
       method: "POST",
@@ -35,7 +37,7 @@ export const SearchBox = ({ className }: { className: string }) => {
       .finally(() => {
         setLoading(false);
       });
-  }, [debouncedValue, setLoading, showSuggestions]);
+  }, [debouncedValue, setLoading]);
 
   const updateUrlParams = (params: { [key: string]: string }) => {
     const queryString = new URLSearchParams(params).toString();
@@ -50,24 +52,21 @@ export const SearchBox = ({ className }: { className: string }) => {
     const params = { artist_id: suggestion.artist_id };
     updateUrlParams(params);
     setShowSuggestions(false);
+    setArtistDataLoading(true);
     setSearchStr(suggestion.artist_name);
     inputRef.current?.blur();
   };
 
   const handleInput = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.value === "") {
-      updateUrlParams({});
-      inputRef.current?.blur();
-    }
     setSearchStr(event.currentTarget.value);
   };
 
   const suggestionsToShow = useMemo(() => {
-    if (searchStr) {
+    if (debouncedValue && !loading) {
       return suggestions;
     }
     return top5suggestions;
-  }, [searchStr, suggestions, top5suggestions]);
+  }, [loading, debouncedValue, suggestions, top5suggestions]);
 
   return (
     <div className={className}>
@@ -82,24 +81,33 @@ export const SearchBox = ({ className }: { className: string }) => {
         ref={inputRef}
       />
       {showSuggestions && (
-        <ul className="border border-gray-300 mt-2 max-h-[300px] overflow-scroll bg-white w-full absolute z-10">
-          <span className="text-xs text-gray-500">Top Suggestions</span>
-          {loading && <CustomLoader />}
-          {suggestionsToShow?.map(
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (suggestion: any, index: number) => (
-              <li
-                key={index}
-                className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-4"
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  onSelect(suggestion);
-                }}
-              >
-                <img src={suggestion.avatar} alt={suggestion?.artist_name} className="rounded-full aspect-square w-6" />{" "}
-                <span>{suggestion.artist_name}</span>
-              </li>
-            )
+        <ul className="border border-gray-300 mt-2 max-h-[226px] overflow-scroll bg-white w-full absolute z-10">
+          {!loading && suggestionsToShow?.length <= 0 ? (
+            <span className="text-lg text-gray-500">No Artist Found</span>
+          ) : (
+            <>
+              <span className="text-xs text-gray-500">Top Suggestions</span>
+              {(loading ? [...Array(5)] : suggestionsToShow)?.map(
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                (suggestion: any, index: number) => (
+                  <li
+                    key={index}
+                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-4"
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      onSelect(suggestion);
+                    }}
+                  >
+                    {loading ? (
+                      <CustomLoader />
+                    ) : (
+                      <img src={suggestion.avatar} alt={suggestion?.artist_name} className="rounded-full aspect-square w-6" />
+                    )}
+                    {loading ? <Skeleton className="h-4 w-full" /> : <span>{suggestion.artist_name}</span>}
+                  </li>
+                )
+              )}
+            </>
           )}
         </ul>
       )}

@@ -13,7 +13,7 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const UserGraph = ({ userGraphData }: { userGraphData: any }) => {
+export const UserGraph = ({ userGraphData, isLoading }: { userGraphData: any; isLoading: boolean }) => {
   return (
     <LineGraph
       header="Users Growth"
@@ -23,6 +23,7 @@ export const UserGraph = ({ userGraphData }: { userGraphData: any }) => {
       xAxixKey="month"
       yAxisKey="totalUsers"
       yAxisKey2="activeUsers"
+      isLoading={isLoading}
     />
   );
 };

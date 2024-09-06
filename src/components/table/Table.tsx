@@ -23,6 +23,7 @@ import {
 
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import Skeleton from "../ui/Skeleton";
 
 type Props<T> = {
   inputPlaceholder: string;
@@ -39,6 +40,7 @@ type Props<T> = {
   setSearchStr: React.Dispatch<React.SetStateAction<string | undefined>>;
   searchStr: string | undefined;
   artistId: string | null;
+  isLoading: boolean;
 };
 
 export function CustomTable<T>({
@@ -56,6 +58,7 @@ export function CustomTable<T>({
   setSearchStr,
   searchStr,
   artistId,
+  isLoading,
 }: Props<T>) {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
@@ -102,7 +105,7 @@ export function CustomTable<T>({
 
   return (
     <div className={`w-full ${artistId ? "md:w-[calc(75vw-5rem)]" : ""} lg:w-full`}>
-      <div className="flex justify-between gap-4 items-center py-4">
+      <div className="flex justify-between gap-10 items-center py-4">
         <Input
           placeholder={inputPlaceholder}
           // value={(table.getColumn(inputFiler)?.getFilterValue() as string) ?? ""}
@@ -116,9 +119,12 @@ export function CustomTable<T>({
           className="max-w-sm w-full p-3"
           type="search"
         />
-        <div className=" text-sm text-muted-foreground">
-          Total {totalDataCount} Streams {totalDesc}
-        </div>
+        {isLoading && <Skeleton className="h-4 w-[80%]" />}
+        {!isLoading && data?.length > 0 && (
+          <div className=" text-sm text-muted-foreground">
+            Total {totalDataCount} Streams {totalDesc}
+          </div>
+        )}
       </div>
       <div className="rounded-md border">
         <Table>
@@ -136,66 +142,82 @@ export function CustomTable<T>({
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-                  ))}
+            {isLoading &&
+              // Render 5 rows as loading placeholders
+              [...Array(5)].map((_, index) => (
+                <tr key={index} className="border-b transition-colors">
+                  {[...Array(6)].map((_, index) => {
+                    return (
+                      <td key={index} className="p-4 align-middle">
+                        <Skeleton className="h-4 w-full" />
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            {!isLoading &&
+              (table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow key={row.id}>
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={columns?.length} className="h-24 text-center">
+                    No results.
+                  </TableCell>
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={columns?.length} className="h-24 text-center">
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
+              ))}
           </TableBody>
         </Table>
       </div>
 
-      <Pagination className="mt-5 pb-5">
-        <PaginationContent>
-          {table.getCanPreviousPage() && (
-            <PaginationItem>
-              <PaginationPrevious className="cursor-pointer" onClick={() => table.previousPage()} />
-            </PaginationItem>
-          )}
-          {table.getState().pagination.pageIndex > 1 && (
-            <PaginationItem>
-              <PaginationEllipsis />
-            </PaginationItem>
-          )}
-          {Array.from(
-            { length: 3 },
-            (_, index) => table.getState().pagination.pageIndex + index + (table.getState().pagination.pageIndex > 0 ? 0 : 1)
-          ).map((page) => (
-            <PaginationItem className="cursor-pointer" key={page}>
-              <PaginationLink
-                isActive={page === table.getState().pagination.pageIndex + 1}
-                onClick={() => {
-                  table.setPageIndex(page - 1);
-                }}
-              >
-                {page}
-              </PaginationLink>
-            </PaginationItem>
-          ))}
+      {!isLoading && data?.length > 0 && (
+        <Pagination className="mt-5 pb-5">
+          <PaginationContent>
+            {table.getCanPreviousPage() && (
+              <PaginationItem>
+                <PaginationPrevious className="cursor-pointer" onClick={() => table.previousPage()} />
+              </PaginationItem>
+            )}
+            {table.getState().pagination.pageIndex > 1 && (
+              <PaginationItem>
+                <PaginationEllipsis />
+              </PaginationItem>
+            )}
+            {Array.from(
+              { length: data.length > 3 ? 3 : data.length },
+              (_, index) => table.getState().pagination.pageIndex + index + (table.getState().pagination.pageIndex > 0 ? 0 : 1)
+            ).map((page) => (
+              <PaginationItem className="cursor-pointer" key={page}>
+                <PaginationLink
+                  isActive={page === table.getState().pagination.pageIndex + 1}
+                  onClick={() => {
+                    table.setPageIndex(page - 1);
+                  }}
+                >
+                  {page}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
 
-          {table.getPageCount() - table.getState().pagination.pageIndex > 3 && (
-            <PaginationItem>
-              <PaginationEllipsis />
-            </PaginationItem>
-          )}
+            {table.getPageCount() - table.getState().pagination.pageIndex > 3 && (
+              <PaginationItem>
+                <PaginationEllipsis />
+              </PaginationItem>
+            )}
 
-          {table.getCanNextPage() && (
-            <PaginationItem>
-              <PaginationNext className="cursor-pointer" onClick={() => table.nextPage()} />
-            </PaginationItem>
-          )}
-        </PaginationContent>
-      </Pagination>
+            {table.getCanNextPage() && (
+              <PaginationItem>
+                <PaginationNext className="cursor-pointer" onClick={() => table.nextPage()} />
+              </PaginationItem>
+            )}
+          </PaginationContent>
+        </Pagination>
+      )}
     </div>
   );
 }

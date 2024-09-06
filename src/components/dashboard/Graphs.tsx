@@ -5,7 +5,7 @@ import { UserGraph } from "./UserGraph";
 import { useDataContext } from "@/context/DataContext";
 
 export const Graphs = () => {
-  const { fromDate, toDate, setLoading, artist } = useDataContext();
+  const { fromDate, toDate, loading, artistId } = useDataContext();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [userGraphData, setUserGraphData] = useState<any>([]);
@@ -14,13 +14,17 @@ export const Graphs = () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [songChartData, setSongChartData] = useState<any>([]);
 
+  const [graphDataLoading, setGraphDataLoading] = useState(true);
+
   useEffect(() => {
+    if (loading) return;
+    setGraphDataLoading(true);
     fetch("/api/graphData", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ toDate, fromDate, artistId: artist?.artist_id }),
+      body: JSON.stringify({ toDate, fromDate, artistId }),
     })
       .then((response) => response.json())
       .then((r) => {
@@ -32,16 +36,18 @@ export const Graphs = () => {
         console.error("Error:", error);
       })
       .finally(() => {
-        setLoading(false);
+        setGraphDataLoading(false);
       });
-  }, [toDate, fromDate, setLoading, artist?.artist_id]);
+  }, [toDate, fromDate, loading, artistId]);
+
+  const isLoading = graphDataLoading || loading;
 
   return (
     <>
-      <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-5`}>
-        {!artist?.artist_id && <UserGraph userGraphData={userGraphData} />}
-        <RevenueGraph pieChartData={pieChartData} />
-        <SongGraph songChartData={songChartData} />
+      <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-5 min-h-[400px]`}>
+        {!artistId && <UserGraph userGraphData={userGraphData} isLoading={isLoading} />}
+        <RevenueGraph pieChartData={pieChartData} isLoading={isLoading} />
+        <SongGraph songChartData={songChartData} isLoading={isLoading} />
       </div>
     </>
   );

@@ -14,7 +14,7 @@ const chartBarConfig = {
 } satisfies ChartConfig;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const SongGraph = ({ songChartData }: { songChartData: any }) => {
+export const SongGraph = ({ songChartData, isLoading }: { songChartData: any; isLoading: boolean }) => {
   const { fromDate, toDate } = useDataContext();
 
   return (
@@ -25,6 +25,7 @@ export const SongGraph = ({ songChartData }: { songChartData: any }) => {
       chartData={songChartData}
       xAxixKey="streams"
       yAxisKey="songName"
+      isLoading={isLoading}
     />
   );
 };

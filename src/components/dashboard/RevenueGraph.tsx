@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { CustomPieChart } from "../graph/PieChart";
 import { ChartConfig } from "../ui/chart";
 import { useDataContext } from "@/context/DataContext";
+import { getMonthNamesBetweenDates } from "@/lib/utils";
 
 const desktopData = [
   { source: "subscriptions", revenue: 186, fill: "var(--color-subscriptions)" },
@@ -20,11 +21,11 @@ const pieChartConfig = {
 } satisfies ChartConfig;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const RevenueGraph = ({ pieChartData }: { pieChartData: any }) => {
+export const RevenueGraph = ({ pieChartData, isLoading }: { pieChartData: any; isLoading: boolean }) => {
   const [activeMonth, setActiveMonth] = useState("");
   const activeIndex = useMemo(() => desktopData.findIndex((item) => item.source === activeMonth), [activeMonth]);
 
-  const { setRevenueSource } = useDataContext();
+  const { setRevenueSource, fromDate, toDate } = useDataContext();
 
   const { chartData, totalRevenue } = useMemo(() => {
     if (!pieChartData) {
@@ -41,6 +42,10 @@ export const RevenueGraph = ({ pieChartData }: { pieChartData: any }) => {
     };
   }, [pieChartData]);
 
+  const monthBetweenDates = useMemo(() => {
+    return getMonthNamesBetweenDates(`${fromDate}`, `${toDate}`);
+  }, [fromDate, toDate]);
+
   const onClickPieSection = (section: string) => {
     if (section === activeMonth) {
       setActiveMonth("");
@@ -54,7 +59,9 @@ export const RevenueGraph = ({ pieChartData }: { pieChartData: any }) => {
   return (
     <CustomPieChart
       header="Revenue"
-      description="chart showing revenue distribution"
+      description={`Chart showing revenue distribution from ${monthBetweenDates?.[0]} to ${
+        monthBetweenDates?.[monthBetweenDates?.length - 1]
+      }`}
       chartData={chartData || []}
       dataKey="revenue"
       nameKey="source"
@@ -62,6 +69,7 @@ export const RevenueGraph = ({ pieChartData }: { pieChartData: any }) => {
       activeIndex={activeIndex}
       onClick={(e) => onClickPieSection(e.name)}
       total={totalRevenue}
+      isLoading={isLoading}
     />
   );
 };

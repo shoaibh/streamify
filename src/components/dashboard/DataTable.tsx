@@ -105,7 +105,7 @@ const columns: ColumnDef<Stream>[] = [
 ];
 
 export const DataTable = () => {
-  const { fromDate, toDate, revenueSource, artist, artistId } = useDataContext();
+  const { fromDate, toDate, revenueSource, artist, loading, artistId } = useDataContext();
 
   const [chartData, setChartData] = useState([]);
   const [totalDataCount, setTotalDataCount] = useState(0);
@@ -114,6 +114,7 @@ export const DataTable = () => {
     pageSize: 5,
   });
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [dataLoading, setDataLoading] = useState<boolean>(true);
   const [searchStr, setSearchStr] = useState<string | undefined>("");
 
   useEffect(() => {
@@ -125,6 +126,8 @@ export const DataTable = () => {
 
   useEffect(() => {
     // Make a request to the serverless function
+    if (loading) return;
+    setDataLoading(true);
     fetch("/api/dataTable", {
       method: "POST",
       headers: {
@@ -147,14 +150,19 @@ export const DataTable = () => {
       })
       .catch((error) => {
         console.error("Error:", error);
+      })
+      .finally(() => {
+        setDataLoading(false);
       });
-  }, [toDate, fromDate, revenueSource, pagination.pageIndex, sorting, debouncedValue, artist?.artist_name]);
+  }, [toDate, fromDate, revenueSource, pagination.pageIndex, sorting, debouncedValue, artist?.artist_name, loading]);
 
   const totalDesc = useMemo(() => {
     const months = getMonthNamesBetweenDates(fromDate, toDate);
 
     return `${revenueSource ? ` (${revenueSource}) ` : ""}between ${months[0]} and ${months[months.length - 1]}`;
   }, [fromDate, revenueSource, toDate]);
+
+  const isLoading = dataLoading || loading;
 
   return (
     <>
@@ -173,6 +181,7 @@ export const DataTable = () => {
         searchStr={searchStr}
         setSearchStr={setSearchStr}
         artistId={artistId}
+        isLoading={isLoading}
       />
     </>
   );

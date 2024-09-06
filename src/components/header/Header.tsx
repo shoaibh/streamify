@@ -12,7 +12,9 @@ export const Header = () => {
   return (
     <header className="fixed top-0 p-4 left-0 w-full bg-white shadow-md shadow-gray-500/10 z-50 ">
       <div className="max-w-[1440px] items-center grid grid-cols-3 m-auto">
-        <h1 className="col-start-2 col-span-1 justify-self-center md:col-start-1  mb-0 md:justify-self-start text-2xl">Streamify</h1>
+        <h1 className="col-start-2 col-span-1 justify-self-center md:col-start-1  mb-0 md:justify-self-start text-2xl">
+          <img src="/logo.png" width={70} height={80} />
+        </h1>
         <div
           className={`md:flex col-span-3 md:col-span-2 justify-between gap-5 transition-all duration-300 ease-in-out ${
             isOpen ? "h-[130px] mt-5 opacity-100" : "h-0 overflow-hidden opacity-0"

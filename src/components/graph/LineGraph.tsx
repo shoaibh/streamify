@@ -1,9 +1,11 @@
 "use client";
 
-import { CartesianGrid, Line, LineChart, XAxis } from "recharts";
+import { CartesianGrid, Legend, Line, LineChart, XAxis, YAxis } from "recharts";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import CustomLoader from "../ui/CustomLoader";
+import Skeleton from "../ui/Skeleton";
 
 type Props = {
   header: string;
@@ -14,39 +16,46 @@ type Props = {
   xAxixKey: string;
   yAxisKey: string;
   yAxisKey2: string;
+  isLoading: boolean;
 };
 
-export function LineGraph({ header, description, chartData, chartConfig, xAxixKey, yAxisKey, yAxisKey2 }: Props) {
+export function LineGraph({ header, description, chartData, chartConfig, xAxixKey, yAxisKey, yAxisKey2, isLoading }: Props) {
   return (
     <Card className="relative">
       <CardHeader>
-        <CardTitle>{header}</CardTitle>
-        <CardDescription>{description}</CardDescription>
+        <CardTitle className="text-[clamp(1rem,2vw+0.5rem,1.5rem)]">{header}</CardTitle>
+        <CardDescription>{isLoading ? <Skeleton className="w-full h-4" /> : description}</CardDescription>
       </CardHeader>
-      <CardContent>
-        <ChartContainer config={chartConfig}>
-          <LineChart
-            accessibilityLayer
-            data={chartData}
-            margin={{
-              left: 12,
-              right: 12,
-            }}
-          >
-            <CartesianGrid vertical={false} />
-            <XAxis dataKey={xAxixKey} tickLine={false} axisLine={false} tickMargin={8} tickFormatter={(value) => value.slice(0, 3)} />
-            <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
-            <Line dataKey={yAxisKey} label={yAxisKey} type="linear" stroke="var(--color-totalUsers)" strokeWidth={2} dot={false} />
-            <Line dataKey={yAxisKey2} label={yAxisKey2} type="linear" stroke="var(--color-activeUsers)" strokeWidth={2} dot={false} />
-          </LineChart>
-        </ChartContainer>
+      <CardContent className={`${isLoading ? "absolute top-1/2 left-1/2 transform -translate-x-1/2 translate-y-1/2" : ""}`}>
+        {isLoading ? (
+          <CustomLoader />
+        ) : (
+          <ChartContainer config={chartConfig}>
+            <LineChart
+              accessibilityLayer
+              data={chartData}
+              margin={{
+                left: 0,
+                right: 12,
+              }}
+            >
+              <CartesianGrid vertical={false} />
+              <XAxis
+                dataKey={xAxixKey}
+                tickLine={true}
+                axisLine={true}
+                tickMargin={12}
+                tickFormatter={(value) => value.slice(0, 3)}
+              ></XAxis>
+              <YAxis dx={-15}></YAxis>
+              <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
+              <Legend layout="horizontal" align="right" verticalAlign="top" />
+              <Line dataKey={yAxisKey} label={yAxisKey} type="linear" stroke="var(--color-totalUsers)" strokeWidth={2} dot={false} />
+              <Line dataKey={yAxisKey2} label={yAxisKey2} type="linear" stroke="var(--color-activeUsers)" strokeWidth={2} dot={false} />
+            </LineChart>
+          </ChartContainer>
+        )}
       </CardContent>
-      <div className="absolute top-2 right-2">
-        <div>
-          <div className="w-3 h-3 aspect-square rounded-full bg-orange-500" /> Total Users
-        </div>
-        <div>Active users</div>
-      </div>
     </Card>
   );
 }
