@@ -65,7 +65,7 @@ export const ArtistProfile = () => {
               >
                 {loading ? <CustomLoader /> : <img src={song?.cover} alt={song?.songName} className="rounded-full aspect-square w-7" />}
                 {loading ? (
-                  <Skeleton className="w-[100px] md:w-full h-5 m-auto" />
+                  <Skeleton className="w-[20vw] md:w-full h-5 m-auto" />
                 ) : (
                   <span className="text-[clamp(0.75rem,0.7vw+0.2rem,1rem)] text-start">
                     {song?.songName} <br /> ({song?.streams} streams)

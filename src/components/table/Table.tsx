@@ -77,7 +77,7 @@ export function CustomTable<T>({
       pagination,
     },
     initialState: {
-      pagination,
+      pagination: { pageIndex: 0, pageSize: 5 },
     },
     // globalFilterFn: ()=>"customFilter",
   });
@@ -168,22 +168,23 @@ export function CustomTable<T>({
                 <PaginationEllipsis />
               </PaginationItem>
             )}
-            {Array.from(
-              { length: data.length > 3 ? 3 : data.length },
-              (_, index) => table.getState().pagination.pageIndex + index + (table.getState().pagination.pageIndex > 0 ? 0 : 1)
-            ).map((page) => (
-              <PaginationItem className="cursor-pointer" key={page}>
-                <PaginationLink
-                  isActive={page === table.getState().pagination.pageIndex + 1}
-                  onClick={() => {
-                    table.setPageIndex(page - 1);
-                  }}
-                >
-                  {page}
-                </PaginationLink>
-              </PaginationItem>
-            ))}
-
+            <div className="flex overflow-scroll max-w-[26vw]">
+              {Array.from(
+                { length: data.length > 3 ? 3 : data.length },
+                (_, index) => table.getState().pagination.pageIndex + index + (table.getState().pagination.pageIndex > 0 ? 0 : 1)
+              ).map((page) => (
+                <PaginationItem className="cursor-pointer" key={page}>
+                  <PaginationLink
+                    isActive={page === table.getState().pagination.pageIndex + 1}
+                    onClick={() => {
+                      table.setPageIndex(page - 1);
+                    }}
+                  >
+                    {page}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
+            </div>
             {table.getPageCount() - table.getState().pagination.pageIndex > 3 && (
               <PaginationItem>
                 <PaginationEllipsis />

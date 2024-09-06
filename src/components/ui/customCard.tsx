@@ -26,20 +26,20 @@ export const Card: FC<Props> = ({ label, count = 0, growth, Icon, BadgeIcon, fil
           {loading && <Skeleton className="h-5 w-12" />}
           {!loading && (
             <PersistentTooltip content={footer2}>
-              <button
+              <div
+                tabIndex={-1}
                 className={`cursor-default flex gap-2 items-center 
           rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors 
-          focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 
+           
           border-transparent hover:opacity-50 ${
             growth && Number(growth) >= 0 ? "bg-[#6cf4be] text-[#146343]" : "bg-[#FB9B88] text-[#AA2106]"
           }  ${badgeClassname}`}
-                onClick={(e) => e.stopPropagation()}
               >
                 <>
                   <BadgeIcon />
                   {growth}
                 </>
-              </button>
+              </div>
             </PersistentTooltip>
           )}
         </div>
