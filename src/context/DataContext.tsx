@@ -1,4 +1,3 @@
-import { useToast } from "@/hooks/use-toast";
 import { createContext, FC, PropsWithChildren, useContext, useEffect, useMemo, useState } from "react";
 
 type ContextType = {
@@ -30,7 +29,6 @@ export const DataContextProvider: FC<PropsWithChildren> = ({ children }) => {
   const [artist, setArtist] = useState<any>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [topSongs, setTopSongs] = useState<any>([]);
-  const { toast } = useToast();
 
   useEffect(() => {
     const handleUrlChange = () => {
@@ -62,10 +60,6 @@ export const DataContextProvider: FC<PropsWithChildren> = ({ children }) => {
       .then((r) => {
         if (!r?.artist) {
           console.log({ r });
-          toast({
-            title: "No Artist with this Artist Id",
-            description: "",
-          });
         }
         setArtist(r.artist);
         setTopSongs(r.songResult);
@@ -76,7 +70,7 @@ export const DataContextProvider: FC<PropsWithChildren> = ({ children }) => {
       .finally(() => {
         setLoading(false);
       });
-  }, [artistId, toast]);
+  }, [artistId]);
 
   const contextValue = useMemo(() => {
     return {
