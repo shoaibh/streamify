@@ -21,7 +21,7 @@ export const ArtistProfile = () => {
   };
 
   return (
-    <div className="mx-0 md:min-w-[25vw] lg:min-w-[20vw] max-h-[calc(100vh-134px)] overflow-scroll relative flex justify-evenly my-4 md:m-0 md:block md:sticky md:top-[114px] rounded border border-gray-200 p-4">
+    <div className="mx-0 gap-5 md:min-w-[25vw] lg:min-w-[20vw] max-h-[calc(100vh-134px)] overflow-scroll relative flex justify-evenly my-4 md:m-0 md:block md:sticky md:top-[114px] rounded border border-gray-200 p-4">
       <button
         onClick={onCrossProfile}
         className="absolute top-2 right-2 inline-flex items-center justify-center p-2 rounded-full text-gray-400 hover:text-gray-800 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white"

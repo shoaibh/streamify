@@ -63,20 +63,22 @@ export const ProfileCard: FC<Props> = ({
           {loading ? (
             <Skeleton className="w-[120px] h-6 m-auto" />
           ) : (
-            <h2 className="text-2xl lg:text-[clamp(1rem,1vw+0.5rem,1.5rem)]">{name}</h2>
+            <h2 className="text-[clamp(0.75rem,3vw+0.4rem,1.5rem)] lg:text-[clamp(1rem,1vw+0.5rem,1.5rem)]">{name}</h2>
           )}
           {!isSong &&
             (loading ? (
               <Skeleton className="w-[100px] h-5 m-auto" />
             ) : (
-              <h2 className="text-xl lg:text-[clamp(0.75rem,1vw+0.5rem,1.25rem)]">
+              <h2 className="text-[clamp(0.75rem,2vw+0.4rem,1.25rem)] lg:text-[clamp(0.75rem,1vw+0.5rem,1.25rem)]">
                 <span className="text-gray-600">Song: {topSong}</span>
               </h2>
             ))}
           {loading ? (
             <Skeleton className="w-[100px] h-4 m-auto" />
           ) : (
-            <h2 className="text-xl lg:text-[clamp(0.75rem,1vw+0.5rem,1rem)] text-gray-400">({count} Streams)</h2>
+            <h2 className="text-[clamp(0.75rem,2vw+0.4rem,1.25rem)] lg:text-[clamp(0.75rem,1vw+0.5rem,1rem)] text-gray-400">
+              ({count} Streams)
+            </h2>
           )}
         </div>
       </div>
@@ -84,7 +86,7 @@ export const ProfileCard: FC<Props> = ({
       <div
         className={` ${
           !topSongExist && !loading ? "hidden" : ""
-        } flex-col row-span-3 self-center items-center gap-2 px-4 text-xl lg:text-[clamp(0.75rem,1vw+0.3rem,1rem)] xl:text-sm`}
+        } flex-col row-span-3 self-center items-center gap-2 px-4 text-[clamp(0.75rem,2vw+0.4rem,1.25rem)] lg:text-[clamp(0.75rem,1vw+0.3rem,1rem)] xl:text-sm`}
       >
         <div className="flex justify-center   gap-2 leading-none">{loading ? <Skeleton className="h-3 w-full" /> : footer1}</div>
       </div>

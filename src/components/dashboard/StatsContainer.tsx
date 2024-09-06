@@ -21,7 +21,7 @@ export const StatsContainer = () => {
   };
 
   return (
-    <div className={`block ${artistId ? "md:flex" : ""}`}>
+    <div className={`block mt-5 md:mt-0 ${artistId ? "md:flex" : ""}`}>
       {artistId && !artist && !loading ? (
         <div className="text-3xl w-full">
           <h1 className="mb-4">No Artist Found</h1>
