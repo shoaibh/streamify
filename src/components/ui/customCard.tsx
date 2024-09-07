@@ -25,7 +25,7 @@ export const Card: FC<Props> = ({ label, count = 0, growth, Icon, BadgeIcon, fil
         <div className="absolute z-10 top-2 right-3 ">
           {loading && <Skeleton className="h-5 w-12" />}
           {!loading && (
-            <PersistentTooltip content={footer2}>
+            <PersistentTooltip content={footer2} className="max-w-[70%]">
               <div
                 tabIndex={-1}
                 className={`cursor-default flex gap-2 items-center 

@@ -154,7 +154,7 @@ export function CustomTable<T>({
         </Table>
       </div>
 
-      {isLoading && <Skeleton className="mt-5 pb-10 mx-auto w-[200px]" />}
+      {isLoading && <Skeleton className="mt-5 mb-5 pb-10 mx-auto w-[200px]" />}
       {!isLoading && data?.length > 0 && (
         <Pagination className="mt-5 pb-5">
           <PaginationContent>

@@ -30,7 +30,7 @@ export const StatsContainer = () => {
       ) : (
         <>
           {artistId && <ArtistProfile />}
-          <div className="flex-grow p-0 md:p-4 md:pt-[2px]">
+          <div className="flex-grow p-0 pb-4 md:p-4 md:pt-[2px]">
             <Stats />
             <Graphs />
             <DataTable />
