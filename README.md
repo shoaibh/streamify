@@ -12,8 +12,8 @@
 
 - Clone the repo `https://github.com/shoaibh/streamify.git`
 - Install the dependencies with `npm i` (or `pnpm i` which I used for the assignment)
-- Run the project with `npm run dev`
-- the project will run locally on `http://localhost:5173/`
+- Run the project with `vercel dev`
+- the project will run locally on `http://localhost:3000/`
 
 
 # React + TypeScript + Vite
